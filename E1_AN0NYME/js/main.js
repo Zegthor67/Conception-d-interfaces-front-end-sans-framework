@@ -39,6 +39,13 @@ async function loadProjects() {
     }
 }
 
+// si une image de l'api ne charge pas (lien cassé), on met un bloc gris à la place
+function fixImages($zone) {
+    $zone.find('img').on('error', function () {
+        $(this).replaceWith('<div class="img-vide">Image indisponible</div>');
+    });
+}
+
 // afficher les projets
 function displayProjects(list) {
     const $container = $('#projects-list');
@@ -69,6 +76,8 @@ function displayProjects(list) {
 
         $container.append(card);
     });
+
+    fixImages($container);
 }
 
 // fonction pour charger les formations
@@ -167,6 +176,8 @@ function displayCourses(list) {
         `;
         $container.append(card);
     });
+
+    fixImages($container);
 }
 
 // ajoute une option dans un select pour chaque valeur du tableau
@@ -232,6 +243,7 @@ let lastButton = null;
 function openModal(html) {
     lastButton = document.activeElement;
     $('#modal-body').html(html);
+    fixImages($('#modal-body'));
     $('#modal').fadeIn(200);
     $('body').addClass('no-scroll');
     $('.modal-close').focus();
@@ -278,14 +290,16 @@ function showCourse(id) {
     const badges = course.technologies.map(tech => `<span class="badge">${tech}</span>`).join('');
     const modules = course.modules.map(m => `<li>${m}</li>`).join('');
 
+    let statut = '<span class="statut dispo">Disponible</span>';
     let bouton = `<a href="inscription.html?formation=${course.id}" class="btn btn-inscrire">S'inscrire maintenant</a>`;
     if (!course.available) {
+        statut = '<span class="statut complet">Complet</span>';
         bouton = `<button type="button" class="btn" disabled>Formation complète</button>`;
     }
 
     openModal(`
         <img src="${course.image}" alt="Illustration de la formation ${course.title}">
-        <span class="categorie">${course.category}</span>
+        <span class="categorie">${course.category}</span> ${statut}
         <h2>${course.title}</h2>
         <p>
             <span class="niveau">${course.level}</span>

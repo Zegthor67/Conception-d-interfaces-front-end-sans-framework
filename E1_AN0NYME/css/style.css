@@ -142,6 +142,7 @@ h1, h2, h3 {
 
 .section {
     padding: 35px 20px;
+    scroll-margin-top: 110px;
 }
 
 .section-alt {
@@ -261,6 +262,16 @@ h1, h2, h3 {
     height: 180px;
     object-fit: cover;
     display: block;
+}
+
+.img-vide {
+    height: 180px;
+    background: #ddd;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 
 .card-body {
