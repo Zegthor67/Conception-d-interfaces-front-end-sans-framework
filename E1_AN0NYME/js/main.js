@@ -302,6 +302,96 @@ function showCourse(id) {
     `);
 }
 
+// remplir le select des formations depuis l'api 2
+async function loadFormCourses() {
+    const $select = $('#formation');
+    $select.prop('disabled', true);
+    $select.find('option').first().text('Chargement des formations...');
+
+    try {
+        const response = await fetch(API_COURSES);
+        if (!response.ok) {
+            throw new Error('Erreur HTTP ' + response.status);
+        }
+
+        const data = await response.json();
+        courses = data.courses;
+
+        courses.forEach(course => {
+            // les formations complètes sont visibles mais on ne peut pas les choisir
+            if (course.available) {
+                $select.append(`<option value="${course.id}">${course.title}</option>`);
+            } else {
+                $select.append(`<option value="${course.id}" disabled>${course.title} (complet)</option>`);
+            }
+        });
+
+        $select.find('option').first().text('Choisir une formation');
+        $select.prop('disabled', false);
+
+    } catch (error) {
+        console.error('Erreur API formations :', error);
+        $select.find('option').first().text('Formations indisponibles');
+        $('#erreur-formation').text('Impossible de charger la liste des formations. Veuillez réessayer plus tard.');
+    }
+}
+
+// regex demandée dans le sujet
+const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// format international : un + puis entre 8 et 15 chiffres (ex : +33612345678)
+const regexTelephone = /^\+[1-9]\d{7,14}$/;
+
+// règles de validation pour chaque champ obligatoire
+// chaque fonction renvoie le message d'erreur, ou '' si c'est bon
+const rules = {
+    prenom: value => value.length >= 2 ? '' : 'Le prénom doit contenir au moins 2 caractères.',
+    nom: value => value.length >= 2 ? '' : 'Le nom doit contenir au moins 2 caractères.',
+    email: value => {
+        if (value === '') return "L'email est obligatoire.";
+        return regexEmail.test(value) ? '' : "L'email n'est pas valide (ex : nom@domaine.com).";
+    },
+    telephone: value => {
+        if (value === '') return 'Le téléphone est obligatoire.';
+        // on enlève les espaces, points et tirets avant de tester
+        const numero = value.replace(/[\s.-]/g, '');
+        return regexTelephone.test(numero) ? '' : 'Format international attendu (ex : +33 6 12 34 56 78).';
+    },
+    formation: value => value !== '' ? '' : 'Veuillez choisir une formation.',
+    niveau: value => value !== '' ? '' : 'Veuillez choisir votre niveau.',
+    motivation: value => value.length >= 50 ? '' : `La motivation doit contenir au moins 50 caractères (${value.length}/50).`
+};
+
+// vérifie un champ et affiche l'erreur en dessous
+// renvoie true si le champ est valide
+function validateField(id) {
+    const $field = $('#' + id);
+    const value = $field.val().trim();
+    const message = rules[id](value);
+
+    $('#erreur-' + id).text(message);
+
+    if (message === '') {
+        $field.removeClass('erreur').addClass('valide').attr('aria-invalid', 'false');
+        return true;
+    } else {
+        $field.removeClass('valide').addClass('erreur').attr('aria-invalid', 'true');
+        return false;
+    }
+}
+
+// compteur de caractères de la motivation
+function updateCounter() {
+    const nb = $('#motivation').val().trim().length;
+    $('#compteur').text(nb + ' / 50 caractères');
+
+    if (nb >= 50) {
+        $('#compteur').addClass('ok');
+    } else {
+        $('#compteur').removeClass('ok');
+    }
+}
+
 // jQuery attend que la page soit chargée avant de lancer le code
 $(function () {
     // #projects-list existe seulement sur index.html
@@ -345,5 +435,30 @@ $(function () {
                 closeModal();
             }
         });
+    }
+
+    // page inscription
+    if ($('#form-inscription').length) {
+        loadFormCourses();
+
+        // Object.keys(rules) = ['prenom', 'nom', 'email', ...]
+        Object.keys(rules).forEach(id => {
+            const $field = $('#' + id);
+
+            // validation en temps réel pendant la saisie
+            // (seulement si le champ a déjà été touché, pour pas afficher d'erreur dès la 1ere lettre)
+            $field.on('input', function () {
+                if ($field.hasClass('erreur') || $field.hasClass('valide')) {
+                    validateField(id);
+                }
+            });
+
+            // quand on quitte le champ ou qu'on change un select
+            $field.on('blur change', function () {
+                validateField(id);
+            });
+        });
+
+        $('#motivation').on('input', updateCounter);
     }
 });

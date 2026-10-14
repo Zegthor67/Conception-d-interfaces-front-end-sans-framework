@@ -473,6 +473,10 @@ h1, h2, h3 {
     color: #888;
 }
 
+.compteur.ok {
+    color: var(--vert);
+}
+
 .btn-envoyer {
     width: 100%;
     padding: 12px;
