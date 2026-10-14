@@ -171,6 +171,27 @@ h1, h2, h3 {
     color: var(--couleur-principale);
 }
 
+.filtres {
+    margin-bottom: 25px;
+}
+
+.filtres input,
+.filtres select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.filtres input:focus,
+.filtres select:focus {
+    outline: none;
+    border-color: var(--couleur-principale);
+}
+
 .loader {
     display: none;
     width: 40px;
@@ -330,5 +351,19 @@ h1, h2, h3 {
 
     .card {
         width: calc(50% - 10px);
+    }
+
+    .filtres {
+        display: flex;
+        gap: 10px;
+    }
+
+    .filtres input {
+        flex: 2;
+    }
+
+    .filtres select {
+        flex: 1;
+        width: auto;
     }
 }

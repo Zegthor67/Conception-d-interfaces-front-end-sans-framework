@@ -30,6 +30,15 @@
         <section id="projets" class="section">
             <h2>Nos projets clients</h2>
             <p class="section-intro">Une sélection de projets réalisés pour nos clients.</p>
+            <div class="filtres">
+                <input type="search" id="projects-search" placeholder="Rechercher un projet..." aria-label="Rechercher un projet">
+                <select id="projects-tech" aria-label="Filtrer par technologie">
+                    <option value="">Toutes les technos</option>
+                </select>
+                <select id="projects-category" aria-label="Filtrer par catégorie">
+                    <option value="">Toutes les catégories</option>
+                </select>
+            </div>
             <div id="projects-loader" class="loader" role="status" aria-label="Chargement des projets"></div>
             <p id="projects-error" class="erreur-api" role="alert"></p>
             <div id="projects-list" class="grid"></div>
@@ -37,6 +46,18 @@
         <section id="formations" class="section section-alt">
             <h2>Nos formations</h2>
             <p class="section-intro">Montez en compétences avec nos formateurs experts.</p>
+            <div class="filtres">
+                <input type="search" id="courses-search" placeholder="Rechercher une formation..." aria-label="Rechercher une formation">
+                <select id="courses-category" aria-label="Filtrer par catégorie">
+                    <option value="">Toutes les catégories</option>
+                </select>
+                <select id="courses-level" aria-label="Filtrer par niveau">
+                    <option value="">Tous les niveaux</option>
+                </select>
+                <select id="courses-tech" aria-label="Filtrer par technologie">
+                    <option value="">Toutes les technos</option>
+                </select>
+            </div>
             <div id="courses-loader" class="loader" role="status" aria-label="Chargement des formations"></div>
             <p id="courses-error" class="erreur-api" role="alert"></p>
             <div id="courses-list" class="grid"></div>

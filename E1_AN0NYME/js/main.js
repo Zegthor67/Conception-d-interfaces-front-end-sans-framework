@@ -19,6 +19,11 @@ async function loadProjects() {
 
         const data = await response.json();
         projects = data.projects;
+
+        // on remplit les select des filtres avec les listes de l'api
+        fillSelect('#projects-tech', data.technologies);
+        fillSelect('#projects-category', data.categories);
+
         displayProjects(projects);
 
     } catch (error) {
@@ -87,6 +92,10 @@ async function loadCourses() {
         // on garde les formations dans la variable du haut du fichier
         courses = data.courses;
 
+        fillSelect('#courses-category', data.categories);
+        fillSelect('#courses-level', data.levels);
+        fillSelect('#courses-tech', data.technologies);
+
         // on les affiche
         displayCourses(courses);
 
@@ -148,7 +157,7 @@ function displayCourses(list) {
                         <span class="niveau">${course.level}</span>
                         ${course.duration} - <strong>${course.price} €</strong>
                     </p>
-                    <p class="infos">★ ${course.rating} - ${course.students} étudiants</p>
+                    <p class="infos">★ ${course.rating} -${course.students} étudiants</p>
                     <div class="badges">${badges}</div>
                     <!-- data-id garde l'id de la formation, pour savoir laquelle ouvrir dans le modal -->
                     <button class="btn btn-details" data-id="${course.id}">Voir détails</button>
@@ -160,6 +169,62 @@ function displayCourses(list) {
     });
 }
 
+// ajoute une option dans un select pour chaque valeur du tableau
+function fillSelect(selector, values) {
+    values.forEach(value => {
+        $(selector).append(`<option value="${value}">${value}</option>`);
+    });
+}
+
+// filtrer les projets (recherche + techno + catégorie en même temps)
+function filterProjects() {
+    const search = $('#projects-search').val().toLowerCase().trim();
+    const tech = $('#projects-tech').val();
+    const category = $('#projects-category').val();
+
+    // filter() garde seulement les projets qui passent les 3 conditions
+    // si un filtre est vide, on ne le prend pas en compte
+    const result = projects.filter(project => {
+        const texte = (project.title + ' ' + project.client + ' ' + project.description).toLowerCase();
+        const okSearch = texte.includes(search);
+        const okTech = tech === '' || project.technologies.includes(tech);
+        const okCategory = category === '' || project.category === category;
+        return okSearch && okTech && okCategory;
+    });
+    displayProjects(result);
+}
+
+// pareil pour les formations avec le niveau en plus
+function filterCourses() {
+    const search = $('#courses-search').val().toLowerCase().trim();
+    const category = $('#courses-category').val();
+    const level = $('#courses-level').val();
+    const tech = $('#courses-tech').val();
+
+    const result = courses.filter(course => {
+        const texte = (course.title + ' ' + course.instructor + ' ' + course.description).toLowerCase();
+
+        const okSearch = texte.includes(search);
+        const okCategory = category === '' || course.category === category;
+        const okLevel = level === '' || course.level === level;
+        const okTech = tech === '' || course.technologies.includes(tech);
+
+        return okSearch && okCategory && okLevel && okTech;
+    });
+    displayCourses(result);
+}
+
+// attend que l'utilisateur arrête de taper avant de lancer la fonction
+// à chaque touche on annule le timer précédent et on en relance un nouveau
+// donc la fonction se lance seulement 300ms après la dernière touche
+function debounce(fn, delay) {
+    let timer;
+    return function () {
+        clearTimeout(timer);
+        timer = setTimeout(fn, delay);
+    };
+}
+
 // jQuery attend que la page soit chargée avant de lancer le code
 $(function () {
     // #projects-list existe seulement sur index.html
@@ -167,5 +232,13 @@ $(function () {
     if ($('#projects-list').length) {
         loadProjects();
         loadCourses();
+
+        // recherche en temps réel
+        $('#projects-search').on('input', debounce(filterProjects, 300));
+        $('#courses-search').on('input', debounce(filterCourses, 300));
+
+        // filtres
+        $('#projects-tech, #projects-category').on('change', filterProjects);
+        $('#courses-category, #courses-level, #courses-tech').on('change', filterCourses);
     }
 });
