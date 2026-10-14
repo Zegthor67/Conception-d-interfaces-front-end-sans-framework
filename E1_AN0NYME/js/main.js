@@ -62,7 +62,7 @@ function displayProjects(list) {
                     <h3>${project.title}</h3>
                     <p class="client">Client : ${project.client}</p>
                     <div class="badges">${badges}</div>
-                    <button class="btn btn-details" data-id="${project.id}">Voir détails</button>
+                    <button class="btn btn-details-projet" data-id="${project.id}">Voir détails</button>
                 </div>
             </article>
         `;
@@ -160,7 +160,7 @@ function displayCourses(list) {
                     <p class="infos">★ ${course.rating} -${course.students} étudiants</p>
                     <div class="badges">${badges}</div>
                     <!-- data-id garde l'id de la formation, pour savoir laquelle ouvrir dans le modal -->
-                    <button class="btn btn-details" data-id="${course.id}">Voir détails</button>
+                    <button class="btn btn-details-formation" data-id="${course.id}">Voir détails</button>
                     ${boutonInscription}
                 </div>
             </article>
@@ -225,6 +225,83 @@ function debounce(fn, delay) {
     };
 }
 
+// bouton qui a ouvert le modal (pour remettre le focus dessus a la fermeture)
+let lastButton = null;
+
+// ouvrir le modal avec le contenu html donné
+function openModal(html) {
+    lastButton = document.activeElement;
+    $('#modal-body').html(html);
+    $('#modal').fadeIn(200);
+    $('body').addClass('no-scroll');
+    $('.modal-close').focus();
+}
+
+// fermer le modal
+function closeModal() {
+    $('#modal').fadeOut(200);
+    $('body').removeClass('no-scroll');
+    if (lastButton) {
+        lastButton.focus();
+    }
+}
+
+// contenu du modal projet
+function showProject(id) {
+    // find() renvoie le premier projet qui a cet id
+    const project = projects.find(p => p.id === id);
+    if (!project) return;
+
+    const badges = project.technologies.map(tech => `<span class="badge">${tech}</span>`).join('');
+    const features = project.features.map(f => `<li>${f}</li>`).join('');
+
+    openModal(`
+        <img src="${project.image}" alt="Aperçu du projet ${project.title}">
+        <span class="categorie">${project.category}</span>
+        <h2>${project.title}</h2>
+        <p><strong>Client :</strong> ${project.client}</p>
+        <p><strong>Année :</strong> ${project.year} - <strong>Durée :</strong> ${project.duration}</p>
+        <p>${project.description}</p>
+        <h3>Technologies</h3>
+        <div class="badges">${badges}</div>
+        <h3>Fonctionnalités</h3>
+        <ul class="liste">${features}</ul>
+        <a href="${project.url}" class="btn" target="_blank" rel="noopener">Voir le site</a>
+    `);
+}
+
+// contenu du modal formation
+function showCourse(id) {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+
+    const badges = course.technologies.map(tech => `<span class="badge">${tech}</span>`).join('');
+    const modules = course.modules.map(m => `<li>${m}</li>`).join('');
+
+    let bouton = `<a href="inscription.html?formation=${course.id}" class="btn btn-inscrire">S'inscrire maintenant</a>`;
+    if (!course.available) {
+        bouton = `<button class="btn" disabled>Formation complète</button>`;
+    }
+
+    openModal(`
+        <img src="${course.image}" alt="Illustration de la formation ${course.title}">
+        <span class="categorie">${course.category}</span>
+        <h2>${course.title}</h2>
+        <p>
+            <span class="niveau">${course.level}</span>
+            ${course.duration} - <strong>${course.price} €</strong>
+        </p>
+        <p>★ ${course.rating} - ${course.students} étudiants</p>
+        <p><strong>Formateur :</strong> ${course.instructor}</p>
+        <p>${course.description}</p>
+        <h3>Technologies</h3>
+        <div class="badges">${badges}</div>
+        <h3>Modules</h3>
+        <ul class="liste">${modules}</ul>
+        ${bouton}
+    `);
+}
+
 // jQuery attend que la page soit chargée avant de lancer le code
 $(function () {
     // #projects-list existe seulement sur index.html
@@ -240,5 +317,33 @@ $(function () {
         // filtres
         $('#projects-tech, #projects-category').on('change', filterProjects);
         $('#courses-category, #courses-level, #courses-tech').on('change', filterCourses);
+
+        // les cartes sont créées après le chargement de la page
+        // donc on met le click sur la div parent (délégation d'événement)
+        $('#projects-list').on('click', '.btn-details-projet', function () {
+            // data('id') renvoie déjà un nombre avec jQuery
+            showProject($(this).data('id'));
+        });
+
+        $('#courses-list').on('click', '.btn-details-formation', function () {
+            showCourse($(this).data('id'));
+        });
+
+        // fermeture avec la croix
+        $('.modal-close').on('click', closeModal);
+
+        // fermeture en cliquant à côté (sur le fond gris, pas dans la fenêtre)
+        $('#modal').on('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // fermeture avec Echap
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape' && $('#modal').is(':visible')) {
+                closeModal();
+            }
+        });
     }
 });
