@@ -147,6 +147,7 @@ function displayCourses(list) {
         }
 
         // construction du HTML de la carte
+        // data-id garde l'id de la formation, pour savoir laquelle ouvrir dans le modal
         const card = `
             <article class="card">
                 <img src="${course.image}" alt="Illustration de la formation ${course.title}">
@@ -157,9 +158,8 @@ function displayCourses(list) {
                         <span class="niveau">${course.level}</span>
                         ${course.duration} - <strong>${course.price} €</strong>
                     </p>
-                    <p class="infos">★ ${course.rating} -${course.students} étudiants</p>
+                    <p class="infos">★ ${course.rating} - ${course.students} étudiants</p>
                     <div class="badges">${badges}</div>
-                    <!-- data-id garde l'id de la formation, pour savoir laquelle ouvrir dans le modal -->
                     <button class="btn btn-details-formation" data-id="${course.id}">Voir détails</button>
                     ${boutonInscription}
                 </div>
@@ -329,6 +329,19 @@ async function loadFormCourses() {
         $select.find('option').first().text('Choisir une formation');
         $select.prop('disabled', false);
 
+        // si on vient du bouton "S'inscrire" d'une carte, l'url contient ?formation=id
+        // on sélectionne directement cette formation dans la liste
+        const params = new URLSearchParams(window.location.search);
+        const idFormation = params.get('formation');
+
+        if (idFormation) {
+            const $option = $select.find(`option[value="${idFormation}"]`);
+            if ($option.length && !$option.prop('disabled')) {
+                $select.val(idFormation);
+                validateField('formation');
+            }
+        }
+
     } catch (error) {
         console.error('Erreur API formations :', error);
         $select.find('option').first().text('Formations indisponibles');
@@ -392,8 +405,65 @@ function updateCounter() {
     }
 }
 
+// vider le formulaire et enlever les couleurs / messages
+function resetForm() {
+    $('#form-inscription')[0].reset();
+    $('#form-inscription .erreur, #form-inscription .valide')
+        .removeClass('erreur valide')
+        .removeAttr('aria-invalid');
+    $('.message-erreur').text('');
+    updateCounter();
+}
+
+// envoi du formulaire
+function submitForm(e) {
+    // empêche la page de se recharger
+    e.preventDefault();
+
+    // on valide tous les champs d'un coup
+    // map() renvoie un tableau de true/false, every() vérifie qu'il n'y a que des true
+    const results = Object.keys(rules).map(id => validateField(id));
+    const formOk = results.every(ok => ok);
+
+    if (!formOk) {
+        // on met le curseur sur le 1er champ en erreur
+        $('#form-inscription .erreur').first().focus();
+        return;
+    }
+
+    const prenom = $('#prenom').val().trim();
+    const formation = $('#formation option:selected').text();
+
+    openModal(`
+        <h2>Inscription envoyée !</h2>
+        <p>Merci ${prenom}, votre demande d'inscription à la formation <strong>${formation}</strong> a bien été enregistrée.</p>
+        <p>Vous allez recevoir un email de confirmation.</p>
+        <button type="button" class="btn" id="btn-ok">OK</button>
+    `);
+
+    resetForm();
+}
+
 // jQuery attend que la page soit chargée avant de lancer le code
 $(function () {
+    // fermeture du modal (il y en a un sur les 2 pages)
+    // avec la croix
+    $('.modal-close').on('click', closeModal);
+
+    // en cliquant à côté (sur le fond gris, pas dans la fenêtre)
+    $('#modal').on('click', function (e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // avec Echap
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape' && $('#modal').is(':visible')) {
+            closeModal();
+        }
+    });
+
     // #projects-list existe seulement sur index.html
     // donc ça évite de lancer les fetch sur la page inscription
     if ($('#projects-list').length) {
@@ -417,23 +487,6 @@ $(function () {
 
         $('#courses-list').on('click', '.btn-details-formation', function () {
             showCourse($(this).data('id'));
-        });
-
-        // fermeture avec la croix
-        $('.modal-close').on('click', closeModal);
-
-        // fermeture en cliquant à côté (sur le fond gris, pas dans la fenêtre)
-        $('#modal').on('click', function (e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // fermeture avec Echap
-        $(document).on('keydown', function (e) {
-            if (e.key === 'Escape' && $('#modal').is(':visible')) {
-                closeModal();
-            }
         });
     }
 
@@ -460,5 +513,10 @@ $(function () {
         });
 
         $('#motivation').on('input', updateCounter);
+
+        $('#form-inscription').on('submit', submitForm);
+
+        // bouton OK du message de succès (créé dans le modal donc délégation)
+        $('#modal').on('click', '#btn-ok', closeModal);
     }
 });
