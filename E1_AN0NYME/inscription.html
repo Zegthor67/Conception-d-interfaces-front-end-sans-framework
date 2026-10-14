@@ -25,6 +25,78 @@
         <section class="section">
             <h1>Inscription à une formation</h1>
             <p class="section-intro">Remplissez le formulaire ci dessous pour vous inscrire. Les champs marqués d'un * sont obligatoires.</p>
+            <form id="form-inscription" class="formulaire" novalidate>
+                <fieldset>
+                    <legend>Vos informations</legend>
+
+                    <div class="ligne">
+                        <div class="champ">
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" name="prenom" autocomplete="given-name" aria-describedby="erreur-prenom">
+                            <span class="message-erreur" id="erreur-prenom"></span>
+                        </div>
+                        <div class="champ">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" name="nom" autocomplete="family-name" aria-describedby="erreur-nom">
+                            <span class="message-erreur" id="erreur-nom"></span>
+                        </div>
+                    </div>
+
+                    <div class="ligne">
+                        <div class="champ">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" placeholder="exemple@mail.com" autocomplete="email" aria-describedby="erreur-email">
+                            <span class="message-erreur" id="erreur-email"></span>
+                        </div>
+
+                        <div class="champ">
+                            <label for="telephone">Téléphone *</label>
+                            <input type="tel" id="telephone" name="telephone" placeholder="+33 6 12 34 56 78" autocomplete="tel" aria-describedby="erreur-telephone">
+                            <span class="message-erreur" id="erreur-telephone"></span>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Formation souhaitée</legend>
+                    <div class="ligne">
+                        <div class="champ">
+                            <label for="formation">Formation *</label>
+                            <select id="formation" name="formation" aria-describedby="erreur-formation">
+                                <option value="">Choisir une formation</option>
+                            </select>
+                            <span class="message-erreur" id="erreur-formation"></span>
+                        </div>
+                        <div class="champ">
+                            <label for="niveau">Votre niveau *</label>
+                            <select id="niveau" name="niveau" aria-describedby="erreur-niveau">
+                                <option value="">Choisir un niveau</option>
+                                <option value="Débutant">Débutant</option>
+                                <option value="Intermédiaire">Intermédiaire</option>
+                                <option value="Avancé">Avancé</option>
+                            </select>
+                            <span class="message-erreur" id="erreur-niveau"></span>
+                        </div>
+                    </div>
+                    <div class="ligne">
+                        <div class="champ">
+                            <label for="entreprise">Entreprise</label>
+                            <input type="text" id="entreprise" name="entreprise" autocomplete="organization">
+                        </div>
+
+                        <div class="champ">
+                            <label for="experience">Expérience (en années)</label>
+                            <input type="number" id="experience" name="experience" min="0" max="50">
+                        </div>
+                    </div>
+                    <div class="champ">
+                        <label for="motivation">Motivation *</label>
+                        <textarea id="motivation" name="motivation" rows="5" placeholder="Pourquoi souhaitez-vous suivre cette formation ? (50 caractères minimum)" aria-describedby="erreur-motivation compteur"></textarea>
+                        <span class="compteur" id="compteur">0 / 50 caractères</span>
+                        <span class="message-erreur" id="erreur-motivation"></span>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn-envoyer">Envoyer mon inscription</button>
+            </form>
         </section>
     </main>
     <footer class="footer">
