@@ -56,13 +56,13 @@ function displayProjects(list) {
 
         const card = `
             <article class="card">
-                <img src="${project.image}" alt="Aperçu du projet ${project.title}">
+                <img src="${project.image}" alt="Aperçu du projet ${project.title}" loading="lazy">
                 <div class="card-body">
                     <span class="categorie">${project.category}</span>
                     <h3>${project.title}</h3>
                     <p class="client">Client : ${project.client}</p>
                     <div class="badges">${badges}</div>
-                    <button class="btn btn-details-projet" data-id="${project.id}">Voir détails</button>
+                    <button type="button" class="btn btn-details-projet" data-id="${project.id}">Voir détails</button>
                 </div>
             </article>
         `;
@@ -143,14 +143,14 @@ function displayCourses(list) {
         // si elle est complète on change le badge et on bloque le bouton
         if (!course.available) {
             statut = '<span class="statut complet">Complet</span>';
-            boutonInscription = `<button class="btn btn-inscrire" disabled>S'inscrire</button>`;
+            boutonInscription = `<button type="button" class="btn btn-inscrire" disabled>S'inscrire</button>`;
         }
 
         // construction du HTML de la carte
         // data-id garde l'id de la formation, pour savoir laquelle ouvrir dans le modal
         const card = `
             <article class="card">
-                <img src="${course.image}" alt="Illustration de la formation ${course.title}">
+                <img src="${course.image}" alt="Illustration de la formation ${course.title}" loading="lazy">
                 <div class="card-body">
                     <span class="categorie">${course.category}</span> ${statut}
                     <h3>${course.title}</h3>
@@ -160,7 +160,7 @@ function displayCourses(list) {
                     </p>
                     <p class="infos">★ ${course.rating} - ${course.students} étudiants</p>
                     <div class="badges">${badges}</div>
-                    <button class="btn btn-details-formation" data-id="${course.id}">Voir détails</button>
+                    <button type="button" class="btn btn-details-formation" data-id="${course.id}">Voir détails</button>
                     ${boutonInscription}
                 </div>
             </article>
@@ -280,7 +280,7 @@ function showCourse(id) {
 
     let bouton = `<a href="inscription.html?formation=${course.id}" class="btn btn-inscrire">S'inscrire maintenant</a>`;
     if (!course.available) {
-        bouton = `<button class="btn" disabled>Formation complète</button>`;
+        bouton = `<button type="button" class="btn" disabled>Formation complète</button>`;
     }
 
     openModal(`
@@ -461,6 +461,24 @@ $(function () {
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape' && $('#modal').is(':visible')) {
             closeModal();
+        }
+    });
+
+    // navigation clavier : quand le modal est ouvert, Tab reste dans le modal
+    // arrivé au dernier élément on revient au premier (et l'inverse avec Shift+Tab)
+    $('#modal').on('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+
+        const $focusables = $(this).find('a, button:not([disabled])');
+        const first = $focusables.first()[0];
+        const last = $focusables.last()[0];
+
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
         }
     });
 
