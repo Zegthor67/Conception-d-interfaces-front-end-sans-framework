@@ -257,6 +257,50 @@ h1, h2, h3 {
     border-radius: 10px;
 }
 
+.infos {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.niveau {
+    display: inline-block;
+    background: #fff3cd;
+    color: #8a6d00;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.statut {
+    float: right;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.dispo {
+    color: var(--vert);
+}
+
+.complet {
+    color: var(--rouge);
+}
+
+.btn-inscrire {
+    background: var(--vert);
+    margin-left: 5px;
+}
+
+.btn-inscrire:hover {
+    background: #0b6b0b;
+}
+
+.btn:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
 @media (min-width: 768px) {
     .header {
         padding: 15px 40px;
